@@ -16,3 +16,4 @@ local Boolean = {NewCell false} E in
 end
 
 % セルつかっちゃったー。束縛されているかを確認するIsBoundが欲しい。
+
