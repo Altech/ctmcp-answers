@@ -1,0 +1,19 @@
+# 4.順序一定並行性
+
+	declare A B C D in
+	thread D=C+1 end
+	thread C=B+1 end
+	thread A=1 end
+	thread B=A+1 end
+	{Browse D}
+
+	declare A B C D in
+	A=1
+	B=A+1
+	C=B+1
+	D=C+1
+	{Browse D}
+	
+スレッドの生成は書いてある順。加算は因果順序よりA,B,C,Dの順。結果はいずれも4。  
+計算を部分的にスレッド化しても必要な順序の制約のもとで計算が進められ、結果は変わらない。
+

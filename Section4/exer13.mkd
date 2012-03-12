@@ -1,0 +1,23 @@
+# 13.遅延性と一枚岩関数
+
+
+	fun lazy {Reverse1 S}
+		fun {Rev S R}
+			case S of nil then R
+			[] X|S2 then {Rev S2 X|R} end
+		end
+	in
+		{Rev S nil}
+	end
+
+	fun lazy {Reverse2 S}
+		fun lazy {Rev S R}
+			case S of nil then R
+			[] X|S2 then {Rev S2 X|R} end
+		end
+	in
+		{Rev S nil}
+	end
+	
+
+1はRverse関数の戻り値のみがトリガになっているので、明らかに戻り値を必要としたときに全てを反転する。2は反復計算のそれぞれに遅延があるが、Revを見れば分かるとおり、値を返すのは基底の節のみなので、Reverse関数の戻り値が必要とされた時点で基底まで全て計算される。よって、使う側から見た振る舞い上の違いはなく、結果は同じになる。2は反復の度に遅延トリガを生成、それを必要としていてるので1より遅くなるので、使うなら1である。

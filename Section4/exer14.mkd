@@ -1,0 +1,23 @@
+# 14.遅延性と反復計算
+
+	fun lazy {LAppend As Bs}
+		case As
+		of nil then Bs
+		[] A|Ar then A|{LAppend Ar Bs}
+		end
+	end
+
+言語抽象を解くと以下。
+
+	proc {LAppend As Bs ?Return}
+		case As
+		of nil then Bs
+		[] A|Ar then
+			local Next in
+				Return = A|Next
+				{LAppend Ar Bs Next}
+			end
+		end
+	end
+
+個々の呼び出しにおいては、Returnがトリガ格納域にあるが、次の呼び出しが起こる時点で参照が消えるため、回収される。従って、性急実行のときと同様に、反復的である。

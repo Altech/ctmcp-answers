@@ -1,0 +1,50 @@
+# 8.並行状況におけるデータフロー的振る舞い
+
+	declare
+	fun {Filter In F}
+		case In
+		of X|In2 then
+			if {F X} then X|{Filter In2 F} 
+			else {Filter In2 F} end
+		else
+			nil
+		end
+	end
+	
+	{Show {Filter [5 1 2 4 0] fun {$ X} X>2 end}} % => [5 4]
+
+## (a) 次を実行するとどうなるか？
+
+	declare A
+	{Show {Filter [5 1 A 4 0] fun {$ X} X>2 end}} 
+	
+if文の条件分岐で大小判定がブロックし待機する。
+
+## (b) 次を実行するとどうなるか？
+
+	declare A Out
+	thread Out={Filter [5 1 A 4 0] fun {$ X} X>2 end} end
+	{Show Out}
+	
+表示は、`Out`（未束縛）、`5_`のに通りありうる。（何回か試したが前者しか表示されなかった）
+
+Filter関数は最終的に出力をOutに束縛するので決定性である。Showは中間状態を観測するモデル外ので続きであるため、これを導入すると「観測可能な非決定性」が出現する。
+
+## (c) 次を実行するとするとどうなるか？
+
+	declare Out A C
+	thread Out={Filter [5 1 A 4 0] fun {$ X} X>2 end} end
+	{Delay 1000}
+	{Show Out}
+	
+フォークしたスレッドが行けるとこまで行ってるので、`5|_`が表示される。
+
+## (d) 次を実行するとするとどうなるか？
+
+	declare Out A C
+	thread Out={Filter [5 1 A 4 0] fun {$ X} X>2 end} end
+	thread A=6 end
+	{Delay 1000}
+	{Show Out}
+
+データフロー的振る舞いによって`[5 6 4]`が表示される。
