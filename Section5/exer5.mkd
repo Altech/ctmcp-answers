@@ -1,0 +1,62 @@
+# 5.並行フィルタ
+
+	declare
+	proc {NewPortClose ?S ?Send ?Close}
+		PC={NewCell S}
+	in
+		proc {Send M}
+			S in
+			{Exchange PC M|S S}
+		end
+		proc {Close}
+			nil=@PC
+		end
+	end
+
+	proc {ConcFilter L F ?L2}
+		Send Close
+	in
+		{NewPortClose L2 Send Close}
+		{Barrier 
+			{Map L
+				fun {$ X}
+					proc {$}
+						if {F X} then {Send X} end
+					end
+				end}}
+		{Close}
+	end
+	
+## (a)次を実行するとどうなるか？
+
+	declare Out
+	{ConcFilter [5 1 2 4 0] fun {$ X} X>2 end Out}
+	{Show Out}
+
+`[5 4]`と表示された。5章の意味に従えば、Send操作は直列的に行われるので、メッセージが受信される前にConcFilterが終了するということはないことに注意する。ConcFilterは並行実行するため非決定性であり、`[5 4]`または`[4 5]`という表示がありうる。
+
+## (b)次を実行するとどうなるか？
+
+	declare Out
+	{ConcFilter [5 1 2 4 0] fun {$ X} X>2 end Out}
+	{Delay 1000}
+	{Show Out}
+
+ConcFilterは全てのスレッドが終了するまでブロックするので上に同じ。
+
+## (c)次を実行するとどうなるか？
+
+	declare Out A
+	{ConcFilter [5 1 A 4 0] fun {$ X} X>2 end Out}
+	{Delay 1000}
+	{Show Out}
+
+ConcFilterは全てのスレッドが(ry)ので何も表示されない。A=3を束縛すると、`[5 4 3]`などのように表示される。
+
+## (d)入力リストの要素数nに対するConcFilterの実行回数の計算量は？Filterとの差は？
+
+実行回数の計算量はO(n).
+
+ConcFilterとFilterの差について。Filterはリストのある要素でブロックすればそれ以降はそれが解除されるまで計算されないのに対して、ConcFilterは計算出来る要素は全て計算する。使う計算資源の総量はスレッドを使う分ConcFilterの方が多いが、処理が途中でブロックする可能性がありリストが十分長いのであればConcFilterの方が実行時間として良い。
+
+
