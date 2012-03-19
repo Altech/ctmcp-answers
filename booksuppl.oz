@@ -143,7 +143,7 @@ end
 % Wait without by-need propagation (WaitQuiet)
 
 % This procedure behaves identically to Wait, except that by-need
-% triggers on X are not activated.
+% triggers on X are not activated. 
 
 proc {WaitQuiet X}
    {Value.waitQuiet X}
